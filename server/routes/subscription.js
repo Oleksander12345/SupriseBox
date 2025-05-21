@@ -23,6 +23,7 @@ router.post("/", auth, async (req, res) => {
     category,
     price: box.price,
     image: box.image,
+    status: "pending",
     nextDelivery: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
   });
 

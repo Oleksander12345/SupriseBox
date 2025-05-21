@@ -6,7 +6,6 @@ const Order = require("../models/Order");
 
 router.post('/create-intent', async (req, res) => {
   const { amount } = req.body;
-
   console.log("💰 Received amount:", amount); // 👉 перевір значення
 
   try {
@@ -19,7 +18,7 @@ router.post('/create-intent', async (req, res) => {
       currency: "usd",  
       automatic_payment_methods: { enabled: true },
     });
-
+    
     console.log("✅ Created intent:", paymentIntent.id);
     res.json({ clientSecret: paymentIntent.client_secret });
   } catch (err) {
@@ -32,7 +31,24 @@ router.post("/payment-success", async (req, res) => {
 
   const order = await Order.findById(orderId);
   if (!order) return res.status(404).json({ message: "Order not found" });
+    // if (order && order.isPaid) {
+    //   if (order.isPaid) {
+    //     const subscriptionBoxes = order.boxes.filter(b => b.type === "subscription");
 
+    //     for (const sub of subscriptionBoxes) {
+    //     if (!sub.subscriptionId) continue;
+
+    //     await Subscription.findByIdAndUpdate(
+    //       sub.subscriptionId,
+    //       {
+    //         status: "active",
+    //         startDate: new Date(),
+    //         nextDelivery: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    //       }
+    //     );
+    //   }
+    //   }
+    // }
   order.isPaid = true;
   order.paidAt = new Date();
   await order.save();

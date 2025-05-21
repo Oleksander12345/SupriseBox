@@ -75,7 +75,7 @@ function Dashboard() {
         <div className="dashboard">
             <header className="dashboard-header">
                 <div className="dashboard-search">
-                    <input className="search" placeholder="Search"/>
+                    <input className="search" placeholder="Search" onClick={() => navigate('/boxes')}/>
                 </div>
                 {!user.isLogged && (
                     <nav className="dashboard-nav">
@@ -159,7 +159,7 @@ function Dashboard() {
                         )}
                         {user.isLogged && (
                             <div className="dashboard-subcription-container">
-                                {userSubscription?.map((subscription) => (
+                                {Array.isArray(userSubscription) && userSubscription?.map((subscription) => (
                                     <div className="dashboard-subcription-box" key={subscription._id}>
                                         <div><img src={subscription.image} width={"75px"}  alt="box"/></div>
                                         <div>

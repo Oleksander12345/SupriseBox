@@ -49,7 +49,7 @@ export default function Admin() {
                     <tr><th>Name</th><th>Email</th></tr>
                     </thead>
                     <tbody>
-                        {admin.allUsers?.map((user) => (
+                        {Array.isArray(admin.allUsers) && admin.allUsers?.map((user) => (
                             <tr key={user.email}><td style={{width: "65%"}}>{user.name}</td><td><span className="admin-status">{user.email}</span></td></tr>
                         ))}
                     </tbody>
@@ -65,7 +65,7 @@ export default function Admin() {
                     <tr><th>User</th><th>Subscription</th><th>Next Delivery</th></tr>
                     </thead>
                     <tbody>
-                        {admin.allActiveSubscription?.map((subscription) => (
+                        {Array.isArray(admin.allActiveSubscription) && admin.allActiveSubscription?.map((subscription) => (
                             <tr key={subscription._id}><td>{subscription.user}</td><td>{subscription.subscription}</td><td>{new Date(subscription.nextDelivery).toLocaleString("en-US", {  day: "numeric", month: "long" })}</td></tr> 
                         ))}
                     </tbody>
@@ -86,7 +86,7 @@ export default function Admin() {
                     </tr>
                 </thead>
                 <tbody>
-                    {admin.allBoxes?.map((box) => (
+                    {Array.isArray(admin.allBoxes) && admin.allBoxes?.map((box) => (
                         <tr key={box.id}>
                             <td>#{box.id}</td>
                             <td>{box.user}</td>

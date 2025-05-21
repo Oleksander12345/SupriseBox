@@ -12,6 +12,7 @@ function Subcriptions() {
     const username = localStorage.getItem('username');
     const dispatch = useDispatch()
     const [subscription, setSubscription] = useState()
+    const [searchTerm, setSearchTerm] = useState("");
     
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -50,12 +51,20 @@ function Subcriptions() {
         dispatch(addSubscriptionToCart(boxId))
     }
 
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value.toLowerCase());
+    };
+
+    const filteredSubscriptions = subscription?.filter((sub) =>
+        sub.category.toLowerCase().includes(searchTerm)
+    );
+
 
     return(
         <div className="subcriptions">
             <header className="dashboard-header">
                 <div className="dashboard-search">
-                    <input className="search" placeholder="Search"/>
+                    <input onChange={handleSearch} value={searchTerm} className="search" placeholder="Search"/>
                 </div>
                 {!user.isLogged && (
                     <nav className="dashboard-nav">
@@ -78,7 +87,7 @@ function Subcriptions() {
                     </div>
                 </div>
                 <div className="boxes-container">
-                    {Array.isArray(subscription) && subscription.map((subscription) => (
+                    {Array.isArray(filteredSubscriptions) && filteredSubscriptions.map((subscription) => (
                         <div className="dashboard-trending-child" key={subscription._id}>
                             <img src={subscription.image} width={"150px"} height={"150px"} alt="subscription"/>
                             <h4>{subscription.category}</h4>

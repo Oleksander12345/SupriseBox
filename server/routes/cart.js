@@ -18,31 +18,6 @@ router.get("/", auth, async (req, res) => {
     res.json(cleanedItems);
 });
 
-// router.post("/add", auth, async (req, res) => {
-//   const { boxId } = req.body;
-//   const userId = req.user._id;
-
-//   let cart = await Cart.findOne({ user: userId });
-
-//   if (!cart) {
-//     cart = new Cart({ user: userId, items: [] });
-//   }
-
-//   const existing = cart.items.find(i => i.item.toString() === boxId);
-//   if (existing) {
-//     existing.quantity += 1;
-//   } else {
-//     cart.items.push({ item: boxId });
-//   }
-
-//   await cart.save();
-//   const updated = await Cart.findOne({ user: userId }).populate({
-//     path: "items.item",
-//     populate: { path: "items", model: "Item" } // тобто Box → items (Item)
-//   });
-//   res.json({ cart: updated.items });
-// });
-
 router.delete("/remove/:boxId", auth, async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
   if (!cart) return res.status(404).json({ message: "Cart not found" });

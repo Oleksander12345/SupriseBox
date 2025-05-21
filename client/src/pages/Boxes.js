@@ -6,19 +6,17 @@ import { addItemToCart } from "../store/cart-actions";
 import { authActions } from "../store/auth-slice";
 // import { TokenExpiredError } from "jsonwebtoken";
 
-function Boxes({isLogged}) {
+function Boxes() {
     const user = useSelector(state => state.auth.user)
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const [boxesForSell, setBoxesForSell] = useState([])
+    const [searchTerm, setSearchTerm] = useState("");
 
         
     useEffect(() => {
         const token = localStorage.getItem("token");
         const userDataRaw = localStorage.getItem("userData");
-        
-        console.log("TOKEN:", token); // чи є токен
-        console.log("USER_DATA_RAW:", userDataRaw); // має бути JSON string
         
         const userData = userDataRaw ? JSON.parse(userDataRaw) : null;
         
@@ -30,6 +28,12 @@ function Boxes({isLogged}) {
         
     }, []);
 
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value.toLowerCase());
+    };
+    const filteredSubscriptions = boxesForSell.filter((sub) =>
+        sub.name.toLowerCase().includes(searchTerm)
+    );
 
     const handleAddToCart = async(boxId) => {
         dispatch(addItemToCart(boxId))
@@ -55,7 +59,7 @@ function Boxes({isLogged}) {
         <div className="boxes">
             <header className="dashboard-header">
                 <div className="dashboard-search">
-                    <input className="search" placeholder="Search"/>
+                    <input onChange={handleSearch} value={searchTerm} className="search" placeholder="Search"/>
                 </div>
                 {!user.isLogged && (
                     <nav className="dashboard-nav">
@@ -79,7 +83,7 @@ function Boxes({isLogged}) {
                     </div>
                 </div>
                 <div className="boxes-container">
-                    {boxesForSell.map((box) => {
+                    {filteredSubscriptions.map((box) => {
                         return(
                             <div className="dashboard-trending-child" key={box.id}>
                                 <img src={box.image} width={"150px"} height={"150px"} alt="box"/>
