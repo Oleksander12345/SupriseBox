@@ -9,4 +9,4 @@ const boxSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("Box", boxSchema);
+module.exports = mongoose.model("box", boxSchema);

@@ -48,7 +48,7 @@ function Cart({ onCloseModal }) {
                     <div className="cart-buyed" key={box.item?._id}>
                         <div className="cart-buyed-left">
                         <img src={box.item?.image} width={"150px"} height={"150px"} />
-                        <h4>{box.item?.name}</h4>
+                        <h4>{box.item?.name || box.item?.category}</h4>
                         </div>
                         <div className="cart-controller">
                         <button onClick={() => dispatch(decreaseQuantity(box._id))}>-</button>

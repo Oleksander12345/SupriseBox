@@ -76,7 +76,7 @@ function Boxes() {
             <main>
                 
                 <div className="boxes-title">
-                    <div className="boxes-title-text"><h2>Subcriptions</h2></div>
+                    <div className="boxes-title-text"><h2>Boxes</h2></div>
                     <div className="boxes-title-categories">
                         <button>All Categories</button>
                         <button>Sort by</button>

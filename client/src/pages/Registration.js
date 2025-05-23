@@ -17,41 +17,57 @@ function Registration() {
     const [confirmPassword, setConfirmPassword] = useState("")
 
     async function handleSubmit(e) {
-        e.preventDefault();
-        try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, password})
-            })
-            const data = await response.json();
-            if (password !== confirmPassword) {
-                alert("Passwords do not match");
-                return;
-            }
-            if(response.ok) {
-                const userData = {
-                    name: data.user.name,
-                    email: data.user.email,
-                    role: data.user.role,
-                    token: data.user.token
-                };
-                dispatch(authActions.register(userData))
-                navigate('/login');
-                setName('');
-                setEmail('');
-                setPassword('');
-                setConfirmPassword('')               
-            }
-            if(!response.ok) {
-                throw new Error('user already exist')                
-            }
-        } catch(error) {
-            console.error(error)
-        }
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match");
+        return;
     }
+
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonErr) {
+            console.error("❌ Failed to parse JSON:", jsonErr);
+            alert("Server error: invalid response format");
+            return;
+        }
+
+        if (!response.ok) {
+            console.error("❌ Backend error:", data);
+            alert(data.message || "Registration failed");
+            return;
+        }
+
+        // ✅ Тут точно data.user існує
+        const userData = {
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            token: data.token
+        };
+
+        dispatch(authActions.register(userData));
+        navigate('/login');
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+    } catch (error) {
+        console.error("❌ Network error:", error);
+        alert("Network error. Please try again.");
+    }
+}
+
 
     return (
         <div className="registration-container">

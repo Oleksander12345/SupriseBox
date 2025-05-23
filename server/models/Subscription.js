@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const subscriptionSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  // name: { type: String, required: true }
+  subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
   category: { type: String, required: true },
   startDate: { type: Date, default: Date.now },
   nextDelivery: { type: Date },
@@ -14,4 +14,4 @@ const subscriptionSchema = new mongoose.Schema({
 });
 
 
-module.exports = mongoose.model("Subscription", subscriptionSchema);
+module.exports = mongoose.model("subscription", subscriptionSchema);

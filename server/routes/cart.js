@@ -142,6 +142,10 @@ router.post("/add-subscription/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Subscription not found" });
     }
 
+    if (subscription.status === "active") {
+      return res.status(400).json({ message: "Subscription is already active" });
+    }
+
     const tempSubscription = {
       _id: subscription._id,
       category: subscription.category,
@@ -165,5 +169,6 @@ router.post("/add-subscription/:id", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 module.exports = router;

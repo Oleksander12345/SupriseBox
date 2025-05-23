@@ -9,6 +9,7 @@ const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
 const paymentRoutes = require("./routes/payment");
 const subscriptionRoutes = require("./routes/subscription");
+const subscriptionPlanRoutes = require("./routes/subscriptionPlan");
 const adminRoutes = require("./routes/admin");
 const statsRoutes = require("./routes/stats");
 const authMiddleware = require("./middleware/authMiddleware")
@@ -29,6 +30,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/subscription", subscriptionRoutes)
 app.use("/api/admin", authMiddleware, adminRoutes);
 app.use("/api/stats", statsRoutes)
+app.use("/api/subscriptionPlan", subscriptionPlanRoutes)
 
 mongoose
   .connect(process.env.MONGO_URI)

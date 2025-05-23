@@ -20,6 +20,11 @@ const orderSchema = new mongoose.Schema({
       ]
     }
   ],
+  subscriptions: [
+        {
+            subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "subscription" },
+        },
+    ],
   totalPrice: Number,
   isPaid: { type: Boolean, default: false },
   paidAt: { type: Date },

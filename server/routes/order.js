@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
+const Subscription = require("../models/Subscription");
 const Cart = require("../models/Cart");
 const auth = require("../middleware/authMiddleware");
 const mongoose = require("mongoose");
@@ -14,48 +15,52 @@ router.post("/", auth, async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    console.log("🛒 Cart data:", JSON.stringify(cart, null, 2));
+    const boxes = [];
+    const subscriptions = [];
+    let total = 0;
 
-    const total = cart.items.reduce(
-      (sum, i) => sum + ((i.item?.price || 0) * (i.quantity || 1)),
-      0
-    );
+    for (const entry of cart.items) {
+      const { item, itemType, quantity } = entry;
+
+      if (itemType === "box") {
+        // Якщо box зберігається як об'єкт (а не _id)
+        if (item?.itemsDetailed) {
+          boxes.push({
+            name: item.name || "Unnamed Box",
+            description: item.description || "",
+            image: item.image || "",
+            price: item.price || 0,
+            quantity: quantity || 1,
+            type: "box",
+            items: item.itemsDetailed.map((i) => ({
+              _id: i._id,
+              name: i.name,
+              price: i.price,
+              category: i.category,
+            })),
+          });
+          total += (item.price || 0) * (quantity || 1);
+        }
+      }
+
+      if (itemType === "subscription") {
+        // item — це ObjectId
+        const subscription = await Subscription.findById(item);
+        if (subscription) {
+          subscriptions.push({
+            subscriptionId: subscription._id,
+            quantity: quantity || 1,
+          });
+          total += subscription.price * (quantity || 1);
+        }
+      }
+    }
 
     const order = new Order({
       user: userId,
-      boxes: cart.items.map((i) => {
-        const item = i.item;
-        const isBox = i.itemType === "box";
-        const isObjectId = typeof item === "string" || mongoose.Types.ObjectId.isValid(item);
-
-        if (!isBox || !isObjectId) {
-          return {
-            name: item?.name || item?.category || "Unknown",
-            description: item?.description || "",
-            image: item?.image || "",
-            price: item?.price || 0,
-            quantity: i.quantity || 1,
-            items: (item?.itemsDetailed || []).map((subItem) => ({
-              _id: subItem._id || null,
-              name: subItem.name || "Unknown",
-              price: subItem.price || 0,
-              category: subItem.category || "Unknown",
-            })),
-            type: i.itemType || "box",
-          };
-        }
-
-        return {
-          name: "Unknown (ObjectId)",
-          description: "",
-          image: "",
-          price: 0,
-          quantity: i.quantity || 1,
-          items: [],
-          type: i.itemType || "box",
-        };
-      }),
-      totalPrice: total,
+      boxes,
+      subscriptions,
+      totalPrice: parseFloat(total.toFixed(2)),
     });
 
     await order.save();
@@ -71,11 +76,18 @@ router.post("/", auth, async (req, res) => {
 
 
 router.get("/", auth, async (req, res) => {
-    console.log("🔍 GET /order for user:", req.user);
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
-    console.log("📦 Orders found:", orders.length);
+  try {
+    const orders = await Order.find({ user: req.user._id })
+      .populate("subscriptions.subscriptionId")  // 👈 ключовий момент
+      .sort({ createdAt: -1 });
+
     res.json(orders);
+  } catch (err) {
+    console.error("❌ GET /order error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
 });
+
 
 router.get("/paid", auth, async (req, res) => {
   try {

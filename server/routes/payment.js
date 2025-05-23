@@ -27,33 +27,27 @@ router.post('/create-intent', async (req, res) => {
   }
 });
 router.post("/payment-success", async (req, res) => {
-  const { orderId } = req.body;
+  try {
+    const { orderId } = req.body;
 
-  const order = await Order.findById(orderId);
-  if (!order) return res.status(404).json({ message: "Order not found" });
-    // if (order && order.isPaid) {
-    //   if (order.isPaid) {
-    //     const subscriptionBoxes = order.boxes.filter(b => b.type === "subscription");
+    // 1. Знаходимо замовлення
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-    //     for (const sub of subscriptionBoxes) {
-    //     if (!sub.subscriptionId) continue;
+    // 2. Оновлюємо статус замовлення
+    order.isPaid = true;
+    order.paidAt = new Date();
+    await order.save();
 
-    //     await Subscription.findByIdAndUpdate(
-    //       sub.subscriptionId,
-    //       {
-    //         status: "active",
-    //         startDate: new Date(),
-    //         nextDelivery: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    //       }
-    //     );
-    //   }
-    //   }
-    // }
-  order.isPaid = true;
-  order.paidAt = new Date();
-  await order.save();
-  console.log(order)
-  res.status(200).json({ message: "Order marked as paid" });
+    res.status(200).json({
+      message: "Order paid successfull",
+    });
+  } catch (err) {
+    console.error("❌ payment-success error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
 });
 
 module.exports = router;

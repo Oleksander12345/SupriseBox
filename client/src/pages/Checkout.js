@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 
 export default function Checkout() {
+  const token = localStorage.getItem('token');
   const user = useSelector((state) => state.auth.user);
   const [orders, setOrders] = useState([]);
   const stripe = useStripe();
@@ -11,6 +12,23 @@ export default function Checkout() {
   const totalPrice = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0)
   
   useEffect(() => {
+    async function fetchOrders() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/order`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      // Відразу фільтруємо лише неоплачені
+      const unpaid = data.filter((order) => !order.isPaid);
+      setOrders(unpaid);
+    } catch (err) {
+      console.error('❌ Failed to fetch orders:', err);
+    }
+  }
     fetchOrders();
   }, []);
   useEffect(() => {
@@ -18,24 +36,7 @@ export default function Checkout() {
     console.log("Stripe Object →", stripe);
     }, [clientSecret, stripe]);
 
-  async function fetchOrders() {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/order`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    const data = await response.json();
-    // Відразу фільтруємо лише неоплачені
-    const unpaid = data.filter((order) => !order.isPaid);
-    setOrders(unpaid);
-  } catch (err) {
-    console.error('❌ Failed to fetch orders:', err);
-  }
-}
+  
 
   async function handlePayment(orderId) {
     if (!stripe || !elements) return;
@@ -62,7 +63,16 @@ export default function Checkout() {
         if (result.error) {
         console.error("❌ Payment failed:", result.error.message);
         } else if (result.paymentIntent.status === "succeeded") {
-        alert("✅ Payment successful!");
+          alert("✅ Payment successful!");
+          await handlePaymentSuccess(orderId);
+
+          // Знаходимо order, щоб отримати підписки
+          const order = orders.find((o) => o._id === orderId);
+          if (order && order.subscriptions) {
+            for (const sub of order.subscriptions) {
+              await activeTheSubscription(sub.subscriptionId);
+            }
+          }
         }
         
     } catch (error) {
@@ -83,6 +93,22 @@ export default function Checkout() {
       setOrders([]);
     } catch (error) {
         console.error("❌ Error:", error);
+    }
+  }
+
+  async function activeTheSubscription(subscriptionId) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/subscription/activate/${subscriptionId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+      });
+      const data = await response.json();
+      console.log(`✅ Subscription ${subscriptionId} activated:`, data);
+    } catch (error) {
+      console.error(`❌ Failed to activate subscription ${subscriptionId}:`, error);
     }
   }
 
@@ -130,7 +156,7 @@ export default function Checkout() {
           <div className="box-list">
             {orders.map((order) => {
   const boxItems = order.boxes.filter((box) => box.type !== "subscription");
-  const subscriptionItems = order.boxes.filter((box) => box.type === "subscription");
+  const subscriptionItems = order.subscriptions || [];
 
   return (
     <div key={order._id}>
@@ -156,14 +182,14 @@ export default function Checkout() {
         <div className="subscription-scroll">
           <h4>Subscriptions</h4>
           <div className="box-list">
-            {subscriptionItems.map((sub, index) => (
+            {subscriptionItems.map((subscription, index) => (
               <div className="box-item" key={`${order._id}-sub-${index}`}>
-                <img src={sub.image} alt={sub.name} />
+                <img src={subscription.subscriptionId.image} alt={subscription.subscriptionId.name} />
                 <div className="order-details">
-                  <p className="item-name">{sub.name}</p>
+                  <p className="item-name">{subscription.subscriptionId.name}</p>
                   <p className="item-qty">Duration: 12 months</p>
                 </div>
-                <p className="item-price">${sub.price}</p>
+                <p className="item-price">${subscription.subscriptionId.price}</p>
               </div>
             ))}
           </div>

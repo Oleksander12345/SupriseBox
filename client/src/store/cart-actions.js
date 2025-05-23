@@ -108,16 +108,26 @@ export const placeOrder = () => {
 export const addSubscriptionToCart = (subscriptionId) => {
   return async (dispatch) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/cart/add-subscription/${subscriptionId}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ subscriptionId })
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/api/cart/add-subscription/${subscriptionId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
 
-    const data = await response.json();
-    dispatch(cartActions.showCartItem(data.cart));
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message); // ← тут ти отримаєш повідомлення "Subscription is already active"
+        return;
+      }
+
+      dispatch(cartActions.showCartItem(data.cart));
+    } catch (error) {
+      console.error("❌ Error adding subscription:", error);
+      alert("Something went wrong while adding subscription");
+    }
   };
 };

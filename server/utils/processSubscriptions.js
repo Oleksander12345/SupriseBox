@@ -24,7 +24,8 @@ async function processSubscriptions() {
         quantity: 1,
         price
       }],
-      totalPrice: price
+      totalPrice: price,
+      isPaid: true
     });
 
     await order.save();
