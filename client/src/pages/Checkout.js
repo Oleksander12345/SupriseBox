@@ -58,7 +58,7 @@ export default function Checkout() {
           card: elements.getElement(CardElement)
       }
       });
-        handlePaymentSuccess(orderId)
+        
 
         if (result.error) {
         console.error("❌ Payment failed:", result.error.message);
@@ -70,7 +70,7 @@ export default function Checkout() {
           const order = orders.find((o) => o._id === orderId);
           if (order && order.subscriptions) {
             for (const sub of order.subscriptions) {
-              await activeTheSubscription(sub.subscriptionId);
+              await activeTheSubscription(sub.subscriptionId._id || sub.subscriptionId);
             }
           }
         }
@@ -97,20 +97,21 @@ export default function Checkout() {
   }
 
   async function activeTheSubscription(subscriptionId) {
-    try {
-      const response = await fetch(`http://localhost:5000/api/subscription/activate/${subscriptionId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-      });
-      const data = await response.json();
-      console.log(`✅ Subscription ${subscriptionId} activated:`, data);
-    } catch (error) {
-      console.error(`❌ Failed to activate subscription ${subscriptionId}:`, error);
-    }
+  try {
+    const response = await fetch(`http://localhost:5000/api/subscription/activate/${subscriptionId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+    });
+    const data = await response.json();
+    console.log(`✅ Subscription ${subscriptionId} activated:`, data);
+  } catch (error) {
+    console.error(`❌ Failed to activate subscription ${subscriptionId}:`, error);
   }
+}
+
 
 
 

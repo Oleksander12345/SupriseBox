@@ -8,6 +8,7 @@ export default function Profile() {
     const user = useSelector(state => state.auth.user);
     const [paymentedOrder , setPaymentedOrder] = useState()
     const dispatch = useDispatch()
+    const [subscriptions, setSubscriptions] = useState([]);
     const token = localStorage.getItem("token");
 
     useEffect(() => {      
@@ -19,6 +20,22 @@ export default function Profile() {
             console.log("DISPATCHING LOGIN:", userData);
             dispatch(authActions.login(userData));
         }
+        async function fetchSubscriptions() {
+          try {
+            const token = localStorage.getItem("token");
+            const res = await fetch("http://localhost:5000/api/subscription", {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const data = await res.json();
+            setSubscriptions(data);
+          } catch (err) {
+            console.error("❌ Failed to load subscriptions", err);
+          }
+        }
+
+        fetchSubscriptions();
         fetchData();
     
     }, []);
@@ -98,13 +115,10 @@ export default function Profile() {
   <h2 className="profile-section-title">Active Subscriptions</h2>
 <div className="scroll-container">
   <div className="profile-box-grid scrollable">
-    {paymentedOrder?.flatMap(order =>
-      order.boxes
-        .filter(box => box.type === "subscription")
-        .map((box, index) => (
+    {subscriptions?.map((box, index) => (
           <div
             className="profile-box-card"
-            key={`${order._id}-sub-${index}`}
+            key={`${box._id}-sub-${index}`}
             style={{ minWidth: "200px", flexShrink: 0 }}
           >
             <img src={box.image} alt={box.name} className="profile-box-image" />
@@ -114,7 +128,7 @@ export default function Profile() {
             </div>
           </div>
         ))
-    )}
+    }
   </div>
 </div>
 </div>

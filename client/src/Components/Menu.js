@@ -17,6 +17,7 @@ import { cartModalActions } from "../store/cartModal-slice";
 function Menu() {
     const navigate = useNavigate()
     const dispatch = useDispatch()
+    const user = useSelector(state => state.auth.user);
     const cartButtonRef = useRef(null);
     const isModalOpen = useSelector(state => state.cartModal.isModalOpen)
     function handleAddActivecCart(e) {
@@ -45,7 +46,11 @@ function Menu() {
                     onClick={(e) => handleAddActivecCart(e)}
                     ><p className="menu-main-item"><span style={{marginRight: "5px"}}><HiShoppingCart  size={20}/></span><Modal onClose={() => dispatch(cartModalActions.setIsModalClose())}><Cart/></Modal>Cart</p></li>
                     <li onClick={() => navigate("/profile")}><p  className="menu-main-item"><span style={{marginRight: "5px"}}><IoPerson  size={20}/></span> Profile</p></li>
+                    {user?.role === "admin" && (
                     <li onClick={() => navigate("/admin")}><p  className="menu-main-item"><span style={{marginRight: "5px"}}><IoPersonCircleSharp  size={20}/></span> Admin Panel</p></li>
+
+                    )}
+
                 </ul>
             </div>
         </aside>

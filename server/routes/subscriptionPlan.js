@@ -2,32 +2,45 @@ const express = require("express");
 const router = express.Router();
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 
-
-router.get("/plans", async (req, res) => {
-  const plans = await SubscriptionPlan.find();
-  res.json(plans);
+// 🔓 GET /api/subscription/plans
+// Отримати всі доступні плани (можна без авторизації)
+router.get("/", async (req, res) => {
+  try {
+    const plans = await SubscriptionPlan.find({ isVisible: true });
+    res.json(plans);
+  } catch (err) {
+    console.error("❌ Failed to fetch plans:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
-// 🔐 Якщо хочеш обмежити доступ — додай auth + isAdmin
+
+// ✅ POST /api/subscription/plans
+// Створити новий план підписки (можна обмежити доступ адміну)
 router.post("/", async (req, res) => {
   try {
-    const { category, price, image, description } = req.body;
+    const { category, price, image, boxCount } = req.body;
 
     if (!category || !price) {
       return res.status(400).json({ message: "Category and price are required" });
     }
 
-    const existing = await SubscriptionPlan.findOne({ category });
-    if (existing) {
-      return res.status(400).json({ message: "Plan already exists" });
+    const exists = await SubscriptionPlan.findOne({ category });
+    if (exists) {
+      return res.status(400).json({ message: "Plan already exists for this category" });
     }
 
-    const newPlan = new SubscriptionPlan({ category, price, image, description });
-    await newPlan.save();
+    const plan = new SubscriptionPlan({
+      category,
+      price,
+      image,
+      boxCount
+    });
 
-    res.status(201).json({ message: "Subscription plan created", plan: newPlan });
+    await plan.save();
+    res.status(201).json({ message: "Plan created", plan });
   } catch (err) {
     console.error("❌ Error creating plan:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: "Server error" });
   }
 });
 

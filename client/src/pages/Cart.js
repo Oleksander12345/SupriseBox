@@ -51,13 +51,17 @@ function Cart({ onCloseModal }) {
                         <h4>{box.item?.name || box.item?.category}</h4>
                         </div>
                         <div className="cart-controller">
-                        <button onClick={() => dispatch(decreaseQuantity(box._id))}>-</button>
-                        <p>{box.quantity}</p>
-                        <button onClick={() => dispatch(increaseQuantity(box._id))}>+</button>
-                        <h5>${box.item?.price}</h5>
-                        <button onClick={() => handleToRemove(box._id)} className="cart-remove">
-                            <span><MdDeleteForever size={22} /></span>Remove
-                        </button>
+                            {box.itemType === "box" && (
+                                <>
+                                <button onClick={() => dispatch(decreaseQuantity(box._id))}>-</button>
+                                <p>{box.quantity}</p>
+                                <button onClick={() => dispatch(increaseQuantity(box._id))}>+</button>
+                                </>
+                            )}
+                            <h5>${box.item?.price}</h5>
+                            <button onClick={() => handleToRemove(box._id)} className="cart-remove">
+                                <span><MdDeleteForever size={22} /></span>Remove
+                            </button>
                         </div>
                     </div>
                 ))}

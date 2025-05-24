@@ -12,6 +12,7 @@ function Dashboard() {
     const user = useSelector(state => state.auth.user)
     const [popularBoxes, setPopularBoxes] = useState()
     const navigate = useNavigate();
+    const [subscriptions, setSubscriptions] = useState([]);
     const token = localStorage.getItem("token");
     const [userSubscription, setUserSubscription] = useState()
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -31,7 +32,22 @@ function Dashboard() {
         dispatch(authActions.login(userData));
         // dispatch(authActions.logout())
         }
+        async function fetchSubscriptions() {
+          try {
+            const token = localStorage.getItem("token");
+            const res = await fetch("http://localhost:5000/api/subscription", {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            const data = await res.json();
+            setSubscriptions(data);
+          } catch (err) {
+            console.error("❌ Failed to load subscriptions", err);
+          }
+        }
 
+        fetchSubscriptions();
         fetchTrandingBox();
         fetchSubscriptions();
     }, []);
@@ -159,15 +175,18 @@ function Dashboard() {
                         )}
                         {user.isLogged && (
                             <div className="dashboard-subcription-container">
-                                {Array.isArray(userSubscription) && userSubscription?.map((subscription) => (
+                                {Array.isArray(subscriptions) && subscriptions.length > 0 ? (
+                                    subscriptions.map((subscription) => (
                                     <div className="dashboard-subcription-box" key={subscription._id}>
-                                        <div><img src={subscription.image} width={"75px"}  alt="box"/></div>
+                                        <div><img src={subscription.image} width={"75px"} alt="box" /></div>
                                         <div>
-                                            <h5>{subscription.name}</h5>
+                                        <h5>{subscription.category}</h5>
                                         </div>    
                                     </div>
-                                ))}
-                                
+                                    ))
+                                ) : (
+                                    <h4>You don't have any subscriptions</h4>
+                                )}
                             </div>
                         )}
                     </div>

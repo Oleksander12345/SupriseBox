@@ -10,13 +10,14 @@ import Cart from './pages/Cart';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import ProtectRouter from './Components/ProtectRouter';
-import Checkout from './pages/Checkout';
 import StripeWrapper from './Components/StripeWrapper';
+import { useSelector } from 'react-redux';
 
 
 
 function App() {
-
+  const user = useSelector(state => state.auth.user);
+  
   return (
     <Router>
       <Routes>
@@ -33,7 +34,6 @@ function App() {
           <Route path="cart" element={<Cart />} />
           <Route path="profile" element={<ProtectRouter><Profile /></ProtectRouter>} />
           <Route path="admin" element={<ProtectRouter><Admin /></ProtectRouter>} />
-          {/* <Route path="chekout" element={<ProtectRouter><Checkout /></ProtectRouter>} /> */}
           <Route path="checkout" element={<ProtectRouter><StripeWrapper /></ProtectRouter>} />
         </Route>
       </Routes>
