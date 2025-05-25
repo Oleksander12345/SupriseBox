@@ -78,8 +78,8 @@ function Boxes() {
                 <div className="boxes-title">
                     <div className="boxes-title-text"><h2>Boxes</h2></div>
                     <div className="boxes-title-categories">
-                        <button>All Categories</button>
-                        <button>Sort by</button>
+                        {/* <button>All Categories</button>
+                        <button>Sort by</button> */}
                     </div>
                 </div>
                 <div className="boxes-container">

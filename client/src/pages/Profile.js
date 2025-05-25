@@ -56,24 +56,6 @@ export default function Profile() {
         }
     }
     console.log(paymentedOrder)
-    async function updateStatus(id, newStatus) {
-        try {
-            const response = await fetch(`http://localhost:5000/api/subscription/${id}/status`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ status: newStatus }),
-            });
-
-            const data = await response.json();
-            console.log("✅ Status updated:", data);
-            fetchData(); // або перезавантажити список
-        } catch (err) {
-            console.error("❌ Failed to update status:", err);
-        }
-    }
 
 
     return (
@@ -84,7 +66,7 @@ export default function Profile() {
             <h1 className="profile-name">{user.name}</h1>
             <p className="profile-email">{user.email}</p>
             </div>
-            <button className="profile-change-password-button">Change Password</button>
+            {/* <button className="profile-change-password-button">Change Password</button> */}
         </div>
         <div className="profile-paid-orders-section">
 

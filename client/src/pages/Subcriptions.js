@@ -82,8 +82,8 @@ function Subcriptions() {
                 <div className="boxes-title">
                     <div className="boxes-title-text"><h2>Gift Subcription</h2> <h3>It's buyes you a box avery month in a period of year</h3></div>
                     <div className="boxes-title-categories">
-                        <button>All Categories</button>
-                        <button>Sort by</button>
+                        {/* <button>All Categories</button>
+                        <button>Sort by</button> */}
                     </div>
                 </div>
                 <div className="boxes-container">

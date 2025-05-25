@@ -1003,7 +1003,7 @@ a, button {
 .payment-container {
   display: flex;
   justify-content: space-between;
-  padding: 40px;
+  padding: 25px;
   max-width: 1200px;
   margin: 0 auto;
   gap: 30px;
@@ -1078,6 +1078,8 @@ a, button {
 
 .box-scroll {
   margin-bottom: 20px;
+  overflow-y: auto;
+  /* height: 60vh; */
 }
 
 .box-scroll h4 {
@@ -1090,6 +1092,7 @@ a, button {
 .box-list {
   display: flex;
   overflow-x: auto;
+  height: 40vh;
   gap: 16px;
   padding-bottom: 10px;
   justify-content: space-around;

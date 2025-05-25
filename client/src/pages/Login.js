@@ -56,17 +56,18 @@ function Login({ setIsLogged }) {
             <div className="login-panel">
                 <h2>Sign In to <span className="login-brand">SurpriseBox</span></h2>
 
-                <div className="login-social-login">
+                {/* <div className="login-social-login">
                     <button className="login-social-button"><FaGoogle style={{position: "relative", bottom: "1px"}} className="social-button-icons" size={20}/> <span>Google</span></button>
                     <button className="login-social-button"><FaApple style={{position: "relative", bottom: "2px"}} className="social-button-icons"  size={25}/> <span>Apple</span></button>
-                </div>
+                </div> */}
 
-                <p className="login-or">or</p>
+                {/* <p className="login-or">or</p> */}
+                
 
                 <form className="login-form" onSubmit={handleSubmit}>
                     <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    <div className="login-forgot">Forgot Password?</div>
+                    {/* <div className="login-forgot">Forgot Password?</div> */}
                     <button type="submit" className="login-submit-btn">Sign In</button>
                 </form>
 

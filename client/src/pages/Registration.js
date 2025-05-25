@@ -76,12 +76,12 @@ function Registration() {
                     Create your Account
                 </h2>
 
-                <div className="login-social-login">
+                {/* <div className="login-social-login">
                     <button className="login-social-button"><FaGoogle style={{position: "relative", bottom: "1px"}} className="social-button-icons" size={20}/> <span>Google</span></button>
                     <button className="login-social-button"><FaApple style={{position: "relative", bottom: "2px"}} className="social-button-icons"  size={25}/> <span>Apple</span></button>
                 </div>
 
-                <p className="login-or">or</p>
+                <p className="login-or">or</p> */}
 
                 <form className="login-form" onSubmit={handleSubmit}>
                     <input type="text" placeholder="Name" required value={name} onChange={(e) => setName(e.target.value)}/>

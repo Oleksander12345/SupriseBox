@@ -124,7 +124,7 @@ export default function Checkout() {
           <h4>Contact</h4>
           <div className="info-row">
             <span>{user?.email}</span>
-            <button className="change-btn">Change</button>
+            {/* <button className="change-btn">Change</button> */}
           </div>
         </div>
 
