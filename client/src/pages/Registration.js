@@ -53,7 +53,7 @@ export default function Registration() {
 
       const userData = {
         name: resData.user.name,
-        email: resData.user.email,
+        email: resData.user.email, 
         role: resData.user.role,
         token: resData.token,
       };

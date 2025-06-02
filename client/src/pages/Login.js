@@ -10,7 +10,7 @@ const formSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").nonempty("Password is required"),
 });
 
-export default function Login() {
+export default function Login() { 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
