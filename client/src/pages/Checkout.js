@@ -167,12 +167,12 @@ export default function Checkout() {
           <div className="box-list">
             {boxItems.map((box, index) => (
               <div className="box-item" key={`${order._id}-box-${index}`}>
-                <img src={box.image} alt={box.name} />
+                <img src={box?.image} alt={box?.name} />
                 <div className="order-details">
-                  <p className="item-name">{box.name}</p>
-                  <p className="item-qty">Qty {box.quantity}</p>
+                  <p className="item-name">{box?.name}</p>
+                  <p className="item-qty">Qty {box?.quantity}</p>
                 </div>
-                <p className="item-price">${box.price}</p>
+                <p className="item-price">${box?.price}</p>
               </div>
             ))}
           </div>
@@ -180,27 +180,27 @@ export default function Checkout() {
       )}
 
       {subscriptionItems.length > 0 && (
-        <div className="subscription-scroll">
-          <h4>Subscriptions</h4>
-          <div className="box-list">
-            {subscriptionItems.map((subscription, index) => (
-              <div className="box-item" key={`${order._id}-sub-${index}`}>
-                <img src={subscription.subscriptionId.image} alt={subscription.subscriptionId.name} />
-                <div className="order-details">
-                  <p className="item-name">{subscription.subscriptionId.name}</p>
-                  <p className="item-qty">Duration: 12 months</p>
-                </div>
-                <p className="item-price">${subscription.subscriptionId.price}</p>
+            <div className="subscription-scroll">
+              <h4>Subscriptions</h4>
+              <div className="box-list">
+                {subscriptionItems.map((subscription, index) => (
+                  <div className="box-item" key={`${order._id}-sub-${index}`}>
+                    <img src={subscription.subscriptionId?.image} alt={subscription.subscriptionId?.name} />
+                    <div className="order-details">
+                      <p className="item-name">{subscription.subscriptionId?.name}</p>
+                      <p className="item-qty">Duration: 12 months</p>
+                    </div>
+                    <p className="item-price">${subscription.subscriptionId?.price}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      <button className="place-order-btn" onClick={() => handlePayment(order._id)}>Place Order</button>
-    </div>
-  );
-})}
+          <button className="place-order-btn" onClick={() => handlePayment(order._id)}>Place Order</button>
+        </div>
+      );
+    })}
 
 
           </div>

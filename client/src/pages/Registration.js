@@ -1,113 +1,115 @@
 import { useNavigate } from "react-router-dom";
-import { FaGoogle } from "react-icons/fa";
-import { FaApple } from "react-icons/fa";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { authActions } from "../store/auth-slice";
 
-function Registration() {
-    const dispatch = useDispatch()
-    const token = localStorage.getItem("token");
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const role = payload.role;
-    const navigate = useNavigate();
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
+const formSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
-    async function handleSubmit(e) {
-    e.preventDefault();
+export default function Registration() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    if (password !== confirmPassword) {
-        alert("Passwords do not match");
-        return;
-    }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(formSchema),
+  });
 
+  const onSubmit = async (data) => {
     try {
-        const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name, email, password })
-        });
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
+      });
 
-        let data;
-        try {
-            data = await response.json();
-        } catch (jsonErr) {
-            console.error("❌ Failed to parse JSON:", jsonErr);
-            alert("Server error: invalid response format");
-            return;
-        }
+      const resData = await response.json();
 
-        if (!response.ok) {
-            console.error("❌ Backend error:", data);
-            alert(data.message || "Registration failed");
-            return;
-        }
+      if (!response.ok) {
+        alert(resData.message || "Registration failed");
+        return;
+      }
 
-        // ✅ Тут точно data.user існує
-        const userData = {
-            name: data.user.name,
-            email: data.user.email,
-            role: data.user.role,
-            token: data.token
-        };
+      const userData = {
+        name: resData.user.name,
+        email: resData.user.email,
+        role: resData.user.role,
+        token: resData.token,
+      };
 
-        dispatch(authActions.register(userData));
-        navigate('/login');
-        setName('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
+      dispatch(authActions.register(userData));
+      navigate("/login");
+      reset();
     } catch (error) {
-        console.error("❌ Network error:", error);
-        alert("Network error. Please try again.");
+      console.error("❌ Network error:", error);
+      alert("Network error. Please try again.");
     }
-}
+  };
 
+  return (
+    <div className="registration-container">
+      <div className="login-panel">
+        <h2>Create your Account</h2>
 
-    return (
-        <div className="registration-container">
-            <div className="login-panel">
-                <h2>
-                    Create your Account
-                </h2>
+        <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
+          <input type="text" placeholder="Name" {...register("name")} />
+          {errors.name && <p className="error">{errors.name.message}</p>}
 
-                {/* <div className="login-social-login">
-                    <button className="login-social-button"><FaGoogle style={{position: "relative", bottom: "1px"}} className="social-button-icons" size={20}/> <span>Google</span></button>
-                    <button className="login-social-button"><FaApple style={{position: "relative", bottom: "2px"}} className="social-button-icons"  size={25}/> <span>Apple</span></button>
-                </div>
+          <input type="email" placeholder="Email" {...register("email")} />
+          {errors.email && <p className="error">{errors.email.message}</p>}
 
-                <p className="login-or">or</p> */}
+          <input type="password" placeholder="Password" {...register("password")} />
+          {errors.password && <p className="error">{errors.password.message}</p>}
 
-                <form className="login-form" onSubmit={handleSubmit}>
-                    <input type="text" placeholder="Name" required value={name} onChange={(e) => setName(e.target.value)}/>
-                    <input type="email" placeholder="Email" required  value={email} onChange={(e) => setEmail(e.target.value)}/>
-                    <input type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)}/>
-                    <input type="password" placeholder="Confirm Password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
-                    <button type="submit" className="login-submit-btn">Create an Acount</button>
-                </form>
+          <input type="password" placeholder="Confirm Password" {...register("confirmPassword")} />
+          {errors.confirmPassword && (
+            <p className="error">{errors.confirmPassword.message}</p>
+          )}
 
-                <p className="login-signup-text">
-                    Do you have an account? <button onClick={() => navigate("/login")}>Sign in</button>
-                </p>
-            </div>
+          <button type="submit" className="login-submit-btn">
+            Create an Account
+          </button>
+        </form>
 
+        <p className="login-signup-text">
+          Do you have an account?{" "}
+          <button onClick={() => navigate("/login")}>Sign in</button>
+        </p>
+      </div>
 
-            <div className="login-info-panel">
-                <div style={{position: "relative", bottom: "30px"}}>
-                    <div className="login-blur"></div>
-                    <img src="/boxes/gift-box-icon1.png" alt="Gift Box" className="registration-gift-img" />
-                    <h2>Surprise Someone Special</h2>
-                    <p>Discover magical boxes and curated subscriptions just for you.</p>
-                </div>
-                
-            </div>
+      <div className="login-info-panel">
+        <div style={{ position: "relative", bottom: "30px" }}>
+          <div className="login-blur"></div>
+          <img
+            src="/boxes/gift-box-icon1.png"
+            alt="Gift Box"
+            className="registration-gift-img"
+          />
+          <h2>Surprise Someone Special</h2>
+          <p>Discover magical boxes and curated subscriptions just for you.</p>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-
-export default Registration;

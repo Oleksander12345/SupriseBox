@@ -1,93 +1,109 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { FaGoogle } from "react-icons/fa";
-import { FaApple } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { authActions } from "../store/auth-slice";
 
-function Login({ setIsLogged }) {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const token = localStorage.getItem("token");
+const formSchema = z.object({
+  email: z.string().email("Invalid email").nonempty("Email is required"),
+  password: z.string().min(8, "Password must be at least 8 characters").nonempty("Password is required"),
+});
 
+export default function Login() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    async function handleSubmit(e) {
-        e.preventDefault()
-        try {
-            const response = await fetch(`/api/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password})
-            })
-            const data = await response.json()
-            console.log(data)
-            if(response.ok) {
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("userData", JSON.stringify({
-                    name: data.user.name,
-                    email: data.user.email,
-                    role: data.user.role,
-                    token: data.token
-                  }));
-                localStorage.setItem("username", data.user.name);
-                localStorage.setItem("email", data.user.email);
-                const userData = {
-                    name: data.user.name,
-                    email: data.user.email,
-                    role: data.user.role,
-                    token: token,
-                };
-                dispatch(authActions.login(userData))
-                console.log("It's victory")
-                navigate('/');
-            }
-            console.log(data)
-        } catch(error) {
-            console.error(error)
-        }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  async function onSubmit(data) {
+    try {
+      const response = await fetch(`/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        alert(resData.message || "Login failed");
+        return;
+      }
+
+      const userData = {
+        name: resData.user.name,
+        email: resData.user.email,
+        role: resData.user.role,
+        token: resData.token,
+      };
+
+      localStorage.setItem("token", resData.token);
+      localStorage.setItem("userData", JSON.stringify(userData));
+      localStorage.setItem("username", resData.user.name);
+      localStorage.setItem("email", resData.user.email);
+
+      dispatch(authActions.login(userData));
+      navigate("/");
+      reset();
+    } catch (error) {
+      console.error("❌ Network error:", error);
+      alert("Network error. Please try again.");
     }
+  }
 
-    return (
-        <div className="login-container">
-            <div className="login-panel">
-                <h2>Sign In to <span className="login-brand">SurpriseBox</span></h2>
+  return (
+    <div className="login-container">
+      <div className="login-panel">
+        <h2>
+          Sign In to <span className="login-brand">SurpriseBox</span>
+        </h2>
 
-                {/* <div className="login-social-login">
-                    <button className="login-social-button"><FaGoogle style={{position: "relative", bottom: "1px"}} className="social-button-icons" size={20}/> <span>Google</span></button>
-                    <button className="login-social-button"><FaApple style={{position: "relative", bottom: "2px"}} className="social-button-icons"  size={25}/> <span>Apple</span></button>
-                </div> */}
+        <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
+          <input
+            type="email"
+            placeholder="Email"
+            {...register("email")}
+          />
+          {errors.email && <p className="error">{errors.email.message}</p>}
 
-                {/* <p className="login-or">or</p> */}
-                
+          <input
+            type="password"
+            placeholder="Password"
+            {...register("password")}
+          />
+          {errors.password && <p className="error">{errors.password.message}</p>}
 
-                <form className="login-form" onSubmit={handleSubmit}>
-                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    {/* <div className="login-forgot">Forgot Password?</div> */}
-                    <button type="submit" className="login-submit-btn">Sign In</button>
-                </form>
+          <button type="submit" className="login-submit-btn">Sign In</button>
+        </form>
 
-                <p className="login-signup-text">
-                    Don't have an account? <button onClick={() => navigate("/registration")}>Sign Up</button>
-                </p>
-            </div>
+        <p className="login-signup-text">
+          Don't have an account?{" "}
+          <button onClick={() => navigate("/registration")}>Sign Up</button>
+        </p>
+      </div>
 
-
-            <div className="login-info-panel">
-                <div style={{position: "relative", bottom: "30px"}}>
-                    <div className="login-blur"></div>
-                    <img src="/boxes/gift-box-icon.png" alt="Gift Box" className="login-gift-img" />
-                    <h2>Surprise Someone Special</h2>
-                    <p>Discover magical boxes and curated subscriptions just for you.</p>
-                </div>
-                
-            </div>
+      <div className="login-info-panel">
+        <div style={{ position: "relative", bottom: "30px" }}>
+          <div className="login-blur"></div>
+          <img
+            src="/boxes/gift-box-icon.png"
+            alt="Gift Box"
+            className="login-gift-img"
+          />
+          <h2>Surprise Someone Special</h2>
+          <p>Discover magical boxes and curated subscriptions just for you.</p>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-
-export default Login;
